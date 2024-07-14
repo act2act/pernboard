@@ -56,7 +56,7 @@ app.get('/redirect', async (req, res) => {
     })
 
     try {
-        const response = await fetch('https://kauth.kakao.com/oauth/token', {
+        const tokenResponse = await fetch('https://kauth.kakao.com/oauth/token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -64,9 +64,25 @@ app.get('/redirect', async (req, res) => {
             body: params
             });
 
-        const data = await response.json();
-        // console.log('This is a token: ', data);
-        req.session.key = data.access_token;
+        const tokenData = await tokenResponse.json();
+        req.session.key = tokenData.access_token;
+        
+        const profileResponse = await fetch('https://kapi.kakao.com/v2/user/me', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${req.session.key}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        });
+        
+        const userData = await profileResponse.json();
+        req.session.userId = userData.id;
+        
+        const checkUserExists = await pool.query('SELECT * FROM users WHERE user_id = $1', [userData.id]);
+        if (checkUserExists.rows.length === 0) {
+            const response = await pool.query('INSERT INTO users (user_id, username, created_at) VALUES ($1, $2, $3) RETURNING *', [userData.id, userData.properties.nickname, userData.connected_at]);
+        }
+
         res.status(302).redirect(`${process.env.ORIGIN_URL}`);
     } catch (error) {
         res.send(error.message);
@@ -75,19 +91,10 @@ app.get('/redirect', async (req, res) => {
 
 app.get('/profile', async (req, res) => {
     try {
-        if (!req.session.key) return res.status(401).send({message: 'Unauthorized!'})
+        const response = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+        const currentUser = response.rows[0];
 
-        const response = await fetch('https://kapi.kakao.com/v2/user/me', {
-            method: 'GET',
-            headers: {
-                Authorization: `Bearer ${req.session.key}`,
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-        });
-
-        const data = await response.json();
-        // console.log('This is a user profile: ', data);
-        res.status(200).send(data);
+        res.status(200).send(currentUser);
     } catch (error) {
         res.send(error.message);
     }

@@ -6,8 +6,17 @@ function UserProfile() {
 
     return (
         <>
-            <h1>User Profile</h1>
-            <p>Hi, {user.properties.nickname}!</p>
+            {user ? (
+                <div>
+                    <h1>{user.username}</h1>
+                    <p>{user.created_at}</p>
+                </div>
+            ) : (
+                <div>
+                    <h1>Log in to view your profile</h1>
+                    <a href='/login'>Log in</a>
+                </div>
+            )}
         </>
     )
 };

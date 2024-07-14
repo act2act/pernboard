@@ -11,10 +11,6 @@ function MainLayout({children}) {
         fetchUserProfile();
     }, [])
 
-    useEffect(() => {
-        console.log(user);
-    }, [user])
-
     const fetchUserProfile = async () => {
         try {
             const response = await fetch('http://localhost:4000/profile', {
