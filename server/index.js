@@ -1,6 +1,7 @@
 const express = require('express');
 const session = require('express-session');
 const cors = require('cors');
+const qs = require('qs');
 const crypto = require('crypto');
 const pool = require('./db');
 
@@ -46,24 +47,47 @@ app.get('/authorize', async (req, res) => {
 });
 
 app.get('/redirect', async (req, res) => {
+    const params = qs.stringify({
+        grant_type: 'authorization_code',
+        client_id: process.env.KAKAO_CLIENT_ID,
+        redirect_uri: process.env.KAKAO_REDIRECT_URI,
+        code: req.query.code,
+        client_secret: process.env.KAKAO_CLIENT_SECRET
+    })
+
     try {
         const response = await fetch('https://kauth.kakao.com/oauth/token', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: {
-                grant_type: 'authorization_code',
-                client_id: process.env.KAKAO_CLIENT_ID,
-                redirect_uri: process.env.KAKAO_REDIRECT_URI,
-                code: req.query.code,
-                client_secret: process.env.KAKAO_CLIENT_SECRET
-            }
+            body: params
             });
 
         const data = await response.json();
+        // console.log('This is a token: ', data);
         req.session.key = data.access_token;
-        res.status(302).redirect(`${process.env.ORIGIN_URL}:3000`);
+        res.status(302).redirect(`${process.env.ORIGIN_URL}`);
+    } catch (error) {
+        res.send(error.message);
+    }
+});
+
+app.get('/profile', async (req, res) => {
+    try {
+        if (!req.session.key) return res.status(401).send({message: 'Unauthorized!'})
+
+        const response = await fetch('https://kapi.kakao.com/v2/user/me', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${req.session.key}`,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        });
+
+        const data = await response.json();
+        // console.log('This is a user profile: ', data);
+        res.status(200).send(data);
     } catch (error) {
         res.send(error.message);
     }

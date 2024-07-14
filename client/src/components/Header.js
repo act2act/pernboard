@@ -5,11 +5,14 @@ import { NavLink } from 'react-router-dom';
 function Header() {
     return (
         <header>
-            <div><h1>PERN BOARD</h1></div>
+            <div>
+                <a href='/'>PERN BOARD</a>
+            </div>
             <nav>
                 <ul>
-                    <li><NavLink to='/'>Home</NavLink></li>
+                    {/* <li><NavLink to='/'>Home</NavLink></li> */}
                     <li><NavLink to='/about'>About</NavLink></li>
+                    <li><NavLink to='/profile'>User</NavLink></li>
                     <li><NavLink to='/login'>Log In</NavLink></li>
                 </ul>
             </nav>
