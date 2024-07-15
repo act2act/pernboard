@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import PostCard from '../components/PostCard';
+import { Link } from 'react-router-dom';
 
 function Home() {
     const [posts, setPosts] = useState([]);
@@ -33,7 +34,11 @@ function Home() {
     return (
         <>
             {posts.map((post) => {
-                return <PostCard key={post.post_id} post={post} />
+                return (
+                    <Link to={`/posts/${post.post_id}`} key={post.post_id}>
+                        <PostCard key={post.post_id} post={post} />
+                    </Link>
+                ) 
             })}
         </>
     )

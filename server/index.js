@@ -133,6 +133,18 @@ app.post('/posts', async (req, res) => {
     }
 });
 
+app.get('/posts/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const response = await pool.query('SELECT * FROM posts WHERE post_id = $1', [id]);
+
+        res.status(200).send(response.rows[0]);
+    } catch (error) {
+        res.send(error.message);
+    }
+})
+
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);
 });
