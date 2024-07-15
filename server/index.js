@@ -100,6 +100,17 @@ app.get('/profile', async (req, res) => {
     }
 });
 
+app.get('/logout', async (req, res) => {
+    try {
+        req.session.destroy();
+        const response = await fetch(`https://kauth.kakao.com/oauth/logout?client_id=${process.env.CLIENT_ID}&logout_redirect_uri=${process.env.ORIGIN_URL}`);
+
+        res.status(302).redirect(`${process.env.ORIGIN_URL}`);
+    } catch (error) {
+        res.send(error.message);
+    }
+});
+
 app.get('/posts', async (req, res) => {
     try {
         const response = await pool.query('SELECT * FROM posts');
