@@ -1,10 +1,41 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import PostCard from '../components/PostCard';
 
 function Home() {
-    // Get the posts from the server
-    // Pass the post by mapping it to the PostCard component
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        getPosts();
+    }, []);
+
+    const getPosts = async () => {
+        try {
+            const response = await fetch('http://localhost:4000/posts', {method: 'GET'});
+            const postsData = await response.json();
+            setPosts(postsData);
+        } catch (error) {
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (loading === true) {
+        return <h1>Loading...</h1>
+    }
+
+    if (error === true) {
+        return <h1>{error}</h1>
+    }
+    
     return (
-        <h1>Home</h1>
+        <>
+            {posts.map((post) => {
+                return <PostCard key={post.post_id} post={post} />
+            })}
+        </>
     )
 };
 

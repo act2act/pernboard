@@ -10,10 +10,9 @@ function Header() {
             </div>
             <nav>
                 <ul>
-                    {/* <li><NavLink to='/'>Home</NavLink></li> */}
                     <li><NavLink to='/about'>About</NavLink></li>
                     <li><NavLink to='/profile'>User</NavLink></li>
-                    <li><NavLink to='/login'>Log In</NavLink></li>
+                    <li><NavLink to='/login'>Log in</NavLink></li>
                 </ul>
             </nav>
         </header>

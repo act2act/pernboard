@@ -100,6 +100,28 @@ app.get('/profile', async (req, res) => {
     }
 });
 
+app.get('/posts', async (req, res) => {
+    try {
+        const response = await pool.query('SELECT * FROM posts');
+        const posts = response.rows;
+
+        res.status(200).send(posts);
+    } catch (error) {
+        req.send(error.message);
+    }
+});
+
+app.post('/posts', async (req, res) => {
+    try {
+        const { title, author, post_content } = req.body;
+        const response = await pool.query('INSERT INTO posts (title, author, post_content) VALUES ($1, $2, $3)', [title, author, post_content]);
+
+        res.status(201).send({message: 'Post created successfully'});
+    } catch (error) {
+        res.send(error.message);
+    }
+});
+
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);
 });
