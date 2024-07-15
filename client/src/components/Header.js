@@ -16,6 +16,7 @@ function Header() {
                     <li><NavLink to='/about'>About</NavLink></li>
                     <li><NavLink to='/profile'>User</NavLink></li>
                     { user ? <li><a href='http://localhost:4000/logout'>Log Out</a></li> : <li><NavLink to='/login'>Log In</NavLink></li> }
+                    { user ? <li><NavLink to='/posts/new'>New Post</NavLink></li> : null }
                 </ul>
             </nav>
         </header>
