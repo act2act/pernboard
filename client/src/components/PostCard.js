@@ -1,11 +1,21 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { usePostContext } from '../contexts/PostContext';
 
-function PostCard({ post }) {
+function PostCard() {
+    const { posts } = usePostContext();
+
     return (
         <>
-            <h1>{post.post_id} | {post.title} | {post.created_at} | {post.post_views}</h1>
-            <h3>{post.author}</h3>
-            <h2>{post.post_content}</h2>
+            {posts.map((post) => (
+                <div key={post.post_id}>
+                    <Link to={`/posts/${post.post_id}`} key={post.post_id}>
+                        <h2>{post.title}</h2>
+                    </Link>
+                    <h4>{post.author}</h4>
+                    <p>{post.post_content}</p>
+                </div>
+            ))}
         </>
     )
 };

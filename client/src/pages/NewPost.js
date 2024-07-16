@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useUser } from "../layouts/MainLayout";
+import { useUserContext } from "../contexts/UserContext";
 
 
 function NewPost() {
-    const { user } = useUser();
+    const { user } = useUserContext();
     const [title, setTitle] = useState('');
     const [postContent, setPostContent] = useState('');
 

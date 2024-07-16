@@ -1,26 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
+import { usePostContext } from "../contexts/PostContext";
 
 function Post() {
     const { id } = useParams();
-    const [post, setPost] = useState({});
+    const { findPostById, loading, error } = usePostContext();
 
-    useEffect(() => {
-        getPost();
-    }, []);
+    const post = findPostById(id);
 
-    const getPost = async () => {
-        const response = await fetch(`http://localhost:4000/posts/${id}`, {method: 'GET'});
-
-        const postData = await response.json();
-        setPost(postData);
-    }
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>{error}</p>;
+    if (!post) return <p>Post not found</p>;
 
     return (
         <>
             <h1>{post.title}</h1>
-            <h2>{post.author}</h2>
-            <h3>{post.post_content}</h3>
+            <h3>{post.author}</h3>
+            <p>{post.post_content}</p>
         </>
     )
 }
