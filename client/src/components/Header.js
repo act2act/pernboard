@@ -7,8 +7,8 @@ function Header() {
     const { user } = useUserContext();
 
     return (
-        <header>
-            <div>
+        <header className='container mx-auto'>
+            <div className='text-3xl font-bold'>
                 <a href='/'>PERN BOARD</a>
             </div>
             <nav>
