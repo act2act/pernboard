@@ -143,7 +143,32 @@ app.get('/posts/:id', async (req, res) => {
     } catch (error) {
         res.send(error.message);
     }
+});
+
+app.put('/posts/:id', async (req, res) => {
+    const { id }  = req.params;
+    const { title, post_content } = req.body;
+
+    try {
+        const response = await pool.query('UPDATE posts SET title = $1, post_content = $2 WHERE post_id = $3' , [title, post_content, id]);
+
+        res.status(200).send({message: 'Post updated successfully'});
+    } catch (error) {
+        res.send(error.message);
+    }
 })
+
+app.delete('/posts/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const response = await pool.query('DELETE FROM posts WHERE post_id = $1', [id]);
+
+        res.status(200).send({message: 'Post deleted successfully'});
+    } catch (error) {
+        res.send(error.message);
+    }
+});
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is listening on port ${process.env.PORT}`);
