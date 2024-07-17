@@ -1,9 +1,13 @@
 import { useParams } from "react-router-dom";
+import { useUserContext } from "../contexts/UserContext";
 import { usePostContext } from "../contexts/PostContext";
+import EditButton from "../components/EditButton";
+import DeleteButton from "../components/DeleteButton";
 
 function Post() {
     const { id } = useParams();
     const { findPostById, loading, error } = usePostContext();
+    const { user } = useUserContext();
 
     const post = findPostById(id);
 
@@ -16,6 +20,12 @@ function Post() {
             <h1>{post.title}</h1>
             <h3>{post.author}</h3>
             <p>{post.post_content}</p>
+            {user && user.username === post.author ? (
+                <>
+                    <EditButton post={post} />
+                    <DeleteButton post={post} />
+                </>
+            ) : null}
         </>
     )
 }
