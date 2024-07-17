@@ -7,6 +7,10 @@ function DeleteButton({ post }) {
                     'Content-Type': 'application/json',
                 }
             })
+
+            if (response.ok) {
+                window.location.reload();
+            }
         } catch (error) {
             console.log(error.message);
         }

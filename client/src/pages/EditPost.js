@@ -28,6 +28,10 @@ function EditPost() {
                 })
                 }
             )
+
+            if (response.ok) {
+                window.location.href = '/';
+            }
         } catch (error) {
             console.log(error.message);
         }
