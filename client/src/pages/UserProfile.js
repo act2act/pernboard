@@ -7,12 +7,12 @@ function UserProfile() {
     return (
         <>
             {user ? (
-                <div>
+                <div className='text-white p-4'>
                     <h1>{user.username}</h1>
                     <p>{user.created_at}</p>
                 </div>
             ) : (
-                <div>
+                <div className='text-white p-4'>
                     <h1>Log in to view your profile</h1>
                     <a href='/login'>Log in</a>
                 </div>

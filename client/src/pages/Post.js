@@ -16,17 +16,17 @@ function Post() {
     if (!post) return <p>Post not found</p>;
 
     return (
-        <>
+        <div className="text-white">
             <h1>{post.title}</h1>
             <h3>{post.author}</h3>
-            <p>{post.post_content}</p>
+            <p className="pb-4">{post.post_content}</p>
             {user && user.username === post.author ? (
                 <>
                     <EditButton post={post} />
                     <DeleteButton post={post} />
                 </>
             ) : null}
-        </>
+        </div>
     )
 }
 
