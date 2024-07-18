@@ -4,7 +4,6 @@ const cors = require('cors');
 const qs = require('qs');
 const crypto = require('crypto');
 const pool = require('./db');
-
 const app = express();
 require('dotenv').config();
 
