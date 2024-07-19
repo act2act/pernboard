@@ -3,9 +3,17 @@ const session = require('express-session');
 const cors = require('cors');
 const qs = require('qs');
 const crypto = require('crypto');
+const redis = require('redis');
 const pool = require('./db');
+
 const app = express();
 require('dotenv').config();
+const redisClient = redis.createClient();
+redisClient.on('connect', () => {console.log('Redis connected')});
+redisClient.on('error', (error) => {console.log('Redis error: ' + error)});
+(async () => {
+    await redisClient.connect();
+})();
 
 // Middleware
 
@@ -90,10 +98,18 @@ app.get('/redirect', async (req, res) => {
 
 app.get('/profile', async (req, res) => {
     try {
-        const response = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
-        const currentUser = response.rows[0];
+        const redisResponse = await redisClient.get(req.session.userId.toString());
+        if (redisResponse) {
+            // console.log('Profile cache hit');
+            res.status(200).json(JSON.parse(redisResponse));
+        } else {
+            // console.log('Profile cache miss');
+            const response = await pool.query('SELECT * FROM users WHERE user_id = $1', [req.session.userId]);
+            const currentUser = response.rows[0];
+            redisClient.setEx(req.session.userId.toString(), 3600, JSON.stringify(currentUser));
 
-        res.status(200).send(currentUser);
+            res.status(200).send(currentUser);
+        }
     } catch (error) {
         res.send(error.message);
     }
@@ -112,21 +128,33 @@ app.get('/logout', async (req, res) => {
 
 app.get('/posts', async (req, res) => {
     try {
-        const response = await pool.query('SELECT * FROM posts');
-        const posts = response.rows;
-
-        res.status(200).send(posts);
+        const redisResponse = await redisClient.lRange('posts', 0, -1);
+        if (redisResponse.length > 0) {
+            console.log('Posts cache hit');
+            const posts = redisResponse.map(post => JSON.parse(post));
+            res.status(200).json(posts);
+        } else {
+            console.log('Posts cache miss');
+            const response = await pool.query('SELECT * FROM posts');
+            const posts = response.rows;
+            await redisClient.del('posts');
+            await redisClient.rPush('posts', posts.map(post => JSON.stringify(post)));
+    
+            res.status(200).send(posts);
+        }
     } catch (error) {
-        req.send(error.message);
+        res.send(error.message);
     }
 });
 
 app.post('/posts', async (req, res) => {
     try {
         const { title, author, post_content } = req.body;
-        const response = await pool.query('INSERT INTO posts (title, author, post_content) VALUES ($1, $2, $3)', [title, author, post_content]);
+        const response = await pool.query('INSERT INTO posts (title, author, post_content) VALUES ($1, $2, $3) RETURNING *', [title, author, post_content]); 
+        const newPost = response.rows[0];
+        await redisClient.rPush('posts', JSON.stringify(newPost));
 
-        res.status(201).send({message: 'Post created successfully'});
+        res.status(201).send({message: 'Post created successfully', post: newPost});
     } catch (error) {
         res.send(error.message);
     }
@@ -149,9 +177,14 @@ app.put('/posts/:id', async (req, res) => {
     const { title, post_content } = req.body;
 
     try {
-        const response = await pool.query('UPDATE posts SET title = $1, post_content = $2 WHERE post_id = $3' , [title, post_content, id]);
+        const response = await pool.query('UPDATE posts SET title = $1, post_content = $2 WHERE post_id = $3 RETURNING *', [title, post_content, id]);
+        const updatedPost = response.rows[0];
+        const rawPosts = await redisClient.lRange('posts', 0, -1);
+        const posts = rawPosts.map(post => JSON.parse(post));
+        const idxToUpdate = posts.findIndex(post => post.post_id === parseInt(id));
+        await redisClient.lSet('posts', idxToUpdate, JSON.stringify(updatedPost));
 
-        res.status(200).send({message: 'Post updated successfully'});
+        res.status(200).send({message: 'Post updated successfully', post: updatedPost});
     } catch (error) {
         res.send(error.message);
     }
@@ -161,7 +194,13 @@ app.delete('/posts/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const response = await pool.query('DELETE FROM posts WHERE post_id = $1', [id]);
+        await pool.query('DELETE FROM posts WHERE post_id = $1', [id]);
+
+        const rawPosts = await redisClient.lRange('posts', 0, -1);
+        const posts = rawPosts.map(post => JSON.parse(post));
+        const idxToDelete = posts.findIndex(post => post.post_id === parseInt(id));
+        await redisClient.lSet('posts', idxToDelete, 'TO_DELETE');
+        await redisClient.lRem('posts', 0, 'TO_DELETE');
 
         res.status(200).send({message: 'Post deleted successfully'});
     } catch (error) {

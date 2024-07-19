@@ -13,7 +13,6 @@ function PostCard({ currentPage, postsPerPage }) {
     const indexOfFirstPost = indexOfLastPost - postsPerPage;
     
     const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
-
     return (
         <>
             {currentPosts.map((post) => (
