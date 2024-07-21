@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useUserContext } from "../contexts/UserContext";
+import config from "../config";
+
+const apiUrl = config.apiUrl;
 
 
 function NewPost() {
@@ -12,7 +15,7 @@ function NewPost() {
 
         try {
             console.log(user.username, title, postContent);
-            const response = await fetch('http://localhost:4000/posts', {
+            const response = await fetch(`${apiUrl}/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

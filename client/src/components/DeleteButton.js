@@ -1,7 +1,11 @@
+import config from "../config";
+
+const apiUrl = config.apiUrl;
+
 function DeleteButton({ post }) {
     const deletePost = async () => {
         try {
-            const response = await fetch(`http://localhost:4000/posts/${post.post_id}`, {
+            const response = await fetch(`${apiUrl}/posts/${post.post_id}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',

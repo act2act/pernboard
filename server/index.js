@@ -19,7 +19,7 @@ redisClient.on('error', (error) => {console.log('Redis error: ' + error)});
 
 app.use(express.json());
 app.use(cors({
-    origin: process.env.ORIGIN_URL,
+    origin: '*',
     credentials: true
 }));
 app.use(session({
@@ -130,11 +130,11 @@ app.get('/posts', async (req, res) => {
     try {
         const redisResponse = await redisClient.lRange('posts', 0, -1);
         if (redisResponse.length > 0) {
-            console.log('Posts cache hit');
+            // console.log('Posts cache hit');
             const posts = redisResponse.map(post => JSON.parse(post));
             res.status(200).json(posts);
         } else {
-            console.log('Posts cache miss');
+            // console.log('Posts cache miss');
             const response = await pool.query('SELECT * FROM posts');
             const posts = response.rows;
             await redisClient.del('posts');

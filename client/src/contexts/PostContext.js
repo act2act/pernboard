@@ -1,6 +1,8 @@
+import config from '../config';
 import { useContext, useState, useEffect, createContext } from 'react';
 
 const PostContext = createContext();
+const apiUrl = config.apiUrl;
 
 function PostProvider({ children }) {
     const [posts, setPosts] = useState([]);
@@ -13,7 +15,7 @@ function PostProvider({ children }) {
 
     const fetchPosts = async () => {
         try {
-            const response = await fetch('http://localhost:4000/posts', {method: 'GET'});
+            const response = await fetch(`${apiUrl}/posts`, {method: 'GET'});
             const postsData = await response.json();
             setPosts(postsData);
             setLoading(false);

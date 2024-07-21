@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { usePostContext } from "../contexts/PostContext";
+import config from "../config";
+
+const apiUrl = config.apiUrl;
 
 function EditPost() {
     const { id } = useParams();
@@ -17,7 +20,7 @@ function EditPost() {
         e.preventDefault();
         
         try {
-            const response = await fetch(`http://localhost:4000/posts/${id}`, {
+            const response = await fetch(`${apiUrl}/posts/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'

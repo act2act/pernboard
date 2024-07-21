@@ -1,6 +1,8 @@
+import config from '../config';
 import { useContext, useState, useEffect, createContext } from 'react';
 
 const UserContext = createContext();
+const apiUrl = config.apiUrl;
 
 function UserProvider({ children }) {
     const [user, setUser] = useState(null);
@@ -13,7 +15,7 @@ function UserProvider({ children }) {
 
     const fetchUserProfile = async () => {
         try {
-            const response = await fetch('http://localhost:4000/profile', {
+            const response = await fetch(`${apiUrl}/profile`, {
                 method: 'GET',
                 credentials: 'include'
             })
